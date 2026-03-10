@@ -59,7 +59,38 @@
       </div>
     </section>
 
+
+    
+
     </body>
 </html>
 
  
+<script>
+  // ১. সব ট্যাবকে ধরে আনা
+  const allTab = document.getElementById('all-tab')
+  const openTab = document.getElementById('open-tab');
+  const closedTab = document.getElementById('closed-tab');
+
+  // ২. সব ট্যাবকে একটি অ্যারে তে রাখা
+  const tabs = [allTab, openTab, closedTab];
+
+  // ৩. ট্যাব সক্রিয় করার ফাংশন
+  function setActiveTab(clickedTab) {
+    tabs.forEach(tab => { 
+      if(tab === clickedTab) {
+        tab.classList.add('bg-blue-500', 'text-white');
+        tab.classList.remove('bg-gray-100', 'text-black');
+      } else {
+        tab.classList.remove("bg-blue-500", "text-white");
+        tab.classList.add("bg-gray-100", "text-black"); 
+      }
+    })
+  }
+
+  // ৪. ক্লিক ইভেন্ট যোগ করা
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => setActiveTab(tab));
+  });
+
+</script>
