@@ -36,7 +36,6 @@
     </style>
   </head>
   <body>
- 
     <!-- tab section -->
     <section class="tab-section py-5 md:pt-12">
       <!-- container -->
@@ -59,38 +58,105 @@
       </div>
     </section>
 
-
-    
-
-    </body>
+    <!-- card section -->
+    <section class="card-section">
+      <!-- container -->
+      <div class="max-w-screen-2xl mx-auto shadow-md p-3 rounded-lg">
+        <!-- card container -->
+        <div
+          id="card-container"
+          class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+        >
+          
+        </div>
+      </div>
+    </section>
+  </body>
 </html>
 
- 
 <script>
-  // ১. সব ট্যাবকে ধরে আনা
-  const allTab = document.getElementById('all-tab')
-  const openTab = document.getElementById('open-tab');
-  const closedTab = document.getElementById('closed-tab');
+  // ১. DOM elements ধরো
+const allTab = document.getElementById("all-tab");
+const openTab = document.getElementById("open-tab");
+const closedTab = document.getElementById("closed-tab");
+const cardContainer = document.getElementById("card-container");
 
-  // ২. সব ট্যাবকে একটি অ্যারে তে রাখা
-  const tabs = [allTab, openTab, closedTab];
+const tabs = [allTab, openTab, closedTab];
 
-  // ৩. ট্যাব সক্রিয় করার ফাংশন
-  function setActiveTab(clickedTab) {
-    tabs.forEach(tab => { 
-      if(tab === clickedTab) {
-        tab.classList.add('bg-blue-500', 'text-white');
-        tab.classList.remove('bg-gray-100', 'text-black');
-      } else {
-        tab.classList.remove("bg-blue-500", "text-white");
-        tab.classList.add("bg-gray-100", "text-black"); 
-      }
-    })
-  }
-
-  // ৪. ক্লিক ইভেন্ট যোগ করা
+// ২. Active Tab ফাংশন
+function setActiveTab(clickedTab){
   tabs.forEach(tab => {
-    tab.addEventListener('click', () => setActiveTab(tab));
+    if(tab === clickedTab){
+      tab.classList.add("bg-blue-500","text-white");
+      tab.classList.remove("bg-gray-100","text-black");
+    } else {
+      tab.classList.remove("bg-blue-500","text-white");
+      tab.classList.add("bg-gray-100","text-black");
+    }
   });
+}
 
+// ৩. Display Function (Priority অনুযায়ী রঙ)
+function displayIssues(issues){
+  cardContainer.innerHTML = ""; // পুরানো মুছে দাও
+  issues.forEach(issue => {
+    // Priority অনুযায়ী রঙ
+    let priorityBg = "";
+    let priorityText = "";
+    if(issue.priority === "HIGH"){
+      priorityBg = "bg-[#FECACA]";
+      priorityText = "text-[#EF4444]";
+    } else if(issue.priority === "MEDIUM"){
+      priorityBg = "bg-[#FEF3C7]";
+      priorityText = "text-[#B45309]";
+    } else if(issue.priority === "LOW"){
+      priorityBg = "bg-[#D1FAE5]";
+      priorityText = "text-[#065F46]";
+    }
+
+    cardContainer.innerHTML += `
+      <div class="shadow-md p-3 rounded-lg space-y-4 border-t-4 hover:shadow-lg transition cursor-pointer">
+        <div class="flex justify-between items-center">
+          <img class="h-7 bg-cover" src="assets/Open-Status.png" alt="" />
+          <p class="font-bold px-4 rounded-full py-1 ${priorityBg} ${priorityText}">${issue.priority}</p>
+        </div>
+        <h2 class="font-bold text-gray-700">${issue.title}</h2>
+        <p class="text-xs font-medium text-gray-500">${issue.description}</p>
+        <div class="flex gap-2 flex-wrap">
+          ${issue.labels.map(label => `
+            <div class="flex gap-3 flex-wrap items-center px-4 rounded-full py-1 bg-[#FECACA] text-[#EF4444]">${label}</div>
+          `).join('')}
+        </div>
+        <hr />
+        <div class="text-sm font-medium text-gray-500">
+          <p>#${issue.id} by ${issue.author}</p>
+          <p>${issue.date}</p>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// ৪. API Fetch
+let allIssues = [];
+fetch("https://phi-lab-server.vercel.app/api/v1/lab/issues")
+  .then(res => res.json())
+  .then(data => {
+    allIssues = data.data;
+    displayIssues(allIssues); // প্রথমে All দেখানো
+  })
+  .catch(err => console.error(err));
+
+// ৫. Tab Click Event + Filter
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    setActiveTab(tab);
+
+    let filtered = allIssues;
+    if(tab.id === "open-tab") filtered = allIssues.filter(issue => issue.status === "open");
+    else if(tab.id === "closed-tab") filtered = allIssues.filter(issue => issue.status === "closed");
+
+    displayIssues(filtered);
+  });
+});
 </script>
